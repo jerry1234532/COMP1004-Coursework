@@ -1,0 +1,38 @@
+/* Page background */
+body {
+    background: linear-gradient(to right, #74ebd5, #ACB6E5);
+    min-height: 100vh;
+}
+
+/* Main card styling */
+.weather-card {
+    border-radius: 15px;
+    background-color: white;
+}
+
+/* Title */
+.app-title {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Weather data cards */
+.weather-box {
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+}
+
+.weather-box:hover {
+    transform: scale(1.05);
+}
+
+/* Output spacing */
+#output {
+    margin-top: 20px;
+}
+
+/* Loading text */
+.loading {
+    font-size: 18px;
+    font-weight: 500;
+}
