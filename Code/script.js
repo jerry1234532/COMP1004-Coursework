@@ -33,42 +33,94 @@ function getWeather() {
             const windSpeed = data.wind.speed;
             const humidity = data.main.humidity;
             const cityName = data.name;
+            const latitude = data.coord.lat;
+            const longitude = data.coord.lon;
 
+            // <<-- Fetch alerts data -->>
+            const alertsUrl = `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&exclude=current,minutely,hourly,daily&appid=${apiKey}`;
+            
+            return fetch(alertsUrl)
+                .then(alertResponse => alertResponse.json())
+                .then(alertData => ({
+                    weather: {temperature, description, windSpeed, humidity, cityName},
+                    alerts: alertData.alerts || []
+                }));
+        })
+        .then(result => {
+            const {weather, alerts} = result;
+            
             // <<-- Display UI (Bootstrap + custom CSS) -->>
+            let alertsHTML = '';
+            
+            if (alerts.length > 0) {
+                alertsHTML = `
+                    <div class="alerts-section alerts-section-danger mt-4">
+                        <h4 class="alert-title mb-3">⚠️ Weather Alerts</h4>
+                `;
+                
+                alerts.forEach(alert => {
+                    const startDate = new Date(alert.start * 1000).toLocaleString();
+                    const endDate = new Date(alert.end * 1000).toLocaleString();
+                    
+                    alertsHTML += `
+                        <div class="card alert-card p-3 mb-3 border-danger">
+                            <h5 class="card-title text-danger">${alert.event}</h5>
+                            <p class="card-text"><small class="text-muted"><strong>Source:</strong> ${alert.sender_name}</small></p>
+                            <p class="card-text">${alert.description}</p>
+                            <p class="card-text"><small class="text-muted">
+                                <strong>Starts:</strong> ${startDate}<br>
+                                <strong>Ends:</strong> ${endDate}
+                            </small></p>
+                        </div>
+                    `;
+                });
+                
+                alertsHTML += `</div>`;
+            } else {
+                alertsHTML = `
+                    <div class="alerts-section alerts-section-safe mt-4">
+                        <h4 class="alert-title-safe mb-3">✓ No Weather Alerts</h4>
+                        <p class="text-success">No active weather alerts detected for this location.</p>
+                    </div>
+                `;
+            }
+            
             output.innerHTML = `
-                <h3 class="mb-3">${cityName}</h3>
+                <h3 class="mb-3">${weather.cityName}</h3>
 
                 <div class="row">
 
                     <div class="col-6 mb-3">
                         <div class="card weather-box p-3 shadow-sm">
                             <h6>🌡 Temperature</h6>
-                            <p>${temperature} °C</p>
+                            <p>${weather.temperature} °C</p>
                         </div>
                     </div>
 
                     <div class="col-6 mb-3">
                         <div class="card weather-box p-3 shadow-sm">
                             <h6>🌤 Weather</h6>
-                            <p>${description}</p>
+                            <p>${weather.description}</p>
                         </div>
                     </div>
 
                     <div class="col-6 mb-3">
                         <div class="card weather-box p-3 shadow-sm">
                             <h6>💨 Wind Speed</h6>
-                            <p>${windSpeed} m/s</p>
+                            <p>${weather.windSpeed} m/s</p>
                         </div>
                     </div>
 
                     <div class="col-6 mb-3">
                         <div class="card weather-box p-3 shadow-sm">
                             <h6>💧 Humidity</h6>
-                            <p>${humidity}%</p>
+                            <p>${weather.humidity}%</p>
                         </div>
                     </div>
 
                 </div>
+                
+                ${alertsHTML}
             `;
         })
         .catch(error => {
