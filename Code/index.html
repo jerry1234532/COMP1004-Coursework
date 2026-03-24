@@ -10,8 +10,21 @@
 <body>
 
 <div class="container d-flex justify-content-center align-items-center vh-100">
-    
-    <div class="card weather-card shadow p-4 w-100" style="max-width: 600px;">
+
+    <!-- LOGIN VIEW -->
+    <div id="loginView" class="card weather-card shadow p-4 w-100" style="max-width: 400px;">
+        <h2 class="text-center mb-4">Login</h2>
+
+        <div id="loginOutput"></div>
+
+        <input type="text" id="username" class="form-control mb-3" placeholder="Username">
+        <input type="password" id="password" class="form-control mb-3" placeholder="Password">
+
+        <button class="btn btn-primary w-100" onclick="login()">Login</button>
+    </div>
+
+    <!-- WEATHER APP VIEW -->
+    <div id="appView" class="card weather-card shadow p-4 w-100 d-none" style="max-width: 600px;">
 
         <h1 class="text-center app-title mb-4">Weather App</h1>
 
@@ -20,12 +33,9 @@
             <button class="btn btn-primary" onclick="getWeather()">Search</button>
         </div>
 
-        <div id="output" class="text-center"></div>
+        <div id="output"></div>
 
+        <button class="btn btn-danger mt-3" onclick="logout()">Logout</button>
     </div>
 
 </div>
-
-<script src="script.js"></script>
-</body>
-</html>
