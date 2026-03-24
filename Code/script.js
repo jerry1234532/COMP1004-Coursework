@@ -4,7 +4,7 @@ function getWeather() {
     const city = document.getElementById('cityInput').value.trim();
     const output = document.getElementById('output');
 
-    // 🟡 Empty input check
+    // Empty input check
     if (city === "") {
         output.innerHTML = `
             <div class="alert alert-warning">
@@ -14,7 +14,7 @@ function getWeather() {
         return;
     }
 
-    // 🔄 Loading message
+    // Loading message
     output.innerHTML = `<p class="loading">Loading...</p>`;
 
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
@@ -27,14 +27,14 @@ function getWeather() {
             return response.json();
         })
         .then(data => {
-            // ✅ Extract data
+            // Extract data
             const temperature = data.main.temp;
             const description = data.weather[0].description;
             const windSpeed = data.wind.speed;
             const humidity = data.main.humidity;
             const cityName = data.name;
 
-            // 🎨 Display UI (Bootstrap + custom CSS)
+            // Display UI (Bootstrap + custom CSS)
             output.innerHTML = `
                 <h3 class="mb-3">${cityName}</h3>
 
