@@ -21,6 +21,28 @@
         <input type="password" id="password" class="form-control mb-3" placeholder="Password">
 
         <button class="btn btn-primary w-100" onclick="login()">Login</button>
+        
+        <p class="text-center mt-3">
+            Don't have an account? <a href="#" onclick="switchToRegister()">Register here</a>
+        </p>
+    </div>
+
+    <!-- REGISTER VIEW -->
+    <div id="registerView" class="card weather-card shadow p-4 w-100 d-none" style="max-width: 400px;">
+        <h2 class="text-center mb-4">Register</h2>
+
+        <div id="registerOutput"></div>
+
+        <input type="text" id="regName" class="form-control mb-3" placeholder="Full Name">
+        <input type="email" id="regEmail" class="form-control mb-3" placeholder="Email">
+        <input type="password" id="regPassword" class="form-control mb-3" placeholder="Password">
+        <input type="password" id="regVerifyPassword" class="form-control mb-3" placeholder="Verify Password">
+
+        <button class="btn btn-success w-100" onclick="register()">Register</button>
+        
+        <p class="text-center mt-3">
+            Already have an account? <a href="#" onclick="switchToLogin()">Login here</a>
+        </p>
     </div>
 
     <!-- WEATHER APP VIEW -->
@@ -39,3 +61,7 @@
     </div>
 
 </div>
+
+<script src="script.js"></script>
+</body>
+</html>
