@@ -152,4 +152,88 @@ input, textarea {
     display: flex;
     gap: 10px;
     justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* 7-Day Forecast styling */
+.forecast-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.forecast-card {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%);
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.forecast-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.forecast-date {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.forecast-icon {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin: 8px 0;
+}
+
+.forecast-temp {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    margin: 12px 0;
+    font-weight: bold;
+}
+
+.temp-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.temp-label {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.temp-high {
+    color: #d32f2f;
+    font-size: 1.2rem;
+}
+
+.temp-low {
+    color: #1976d2;
+    font-size: 1.2rem;
+}
+
+.forecast-desc {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 8px 0;
+    text-transform: capitalize;
+}
+
+.forecast-details {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 8px;
 }

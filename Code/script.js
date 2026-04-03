@@ -1,6 +1,7 @@
 const apiKey = 'd33240b0e6f1240bb1be4def48a3a041';
 let currentWeatherData = null;
 let dataSource = 'api'; // 'api' or 'import'
+let forecastEnabled = false; // Toggle for 7-day forecast
 
 // Map weather conditions to SVG images
 function getWeatherImage(description) {
@@ -77,17 +78,45 @@ function getWeather() {
             // <<-- Fetch alerts data -->>
             const alertsUrl = `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&exclude=current,minutely,hourly,daily&appid=${apiKey}`;
             
-            return fetch(alertsUrl)
-                .then(alertResponse => alertResponse.json())
-                .then(alertData => ({
+            // <<-- Fetch 7-day forecast data -->>
+            const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+            
+            return Promise.all([
+                fetch(alertsUrl).then(r => r.json()),
+                fetch(forecastUrl).then(r => r.json())
+            ]).then(([alertData, forecastData]) => {
+                // Process forecast data - take one forecast per day (at noon)
+                const dailyForecasts = {};
+                forecastData.list.forEach(item => {
+                    const date = new Date(item.dt * 1000).toLocaleDateString();
+                    // Take the first forecast of each day or noon if available
+                    if (!dailyForecasts[date] || item.dt_txt.includes('12:00')) {
+                        dailyForecasts[date] = {
+                            date: date,
+                            temp: Math.round(item.main.temp),
+                            tempMin: Math.round(item.main.temp_min),
+                            tempMax: Math.round(item.main.temp_max),
+                            description: item.weather[0].description,
+                            humidity: item.main.humidity,
+                            windSpeed: item.wind.speed,
+                            icon: item.weather[0].main
+                        };
+                    }
+                });
+                
+                const forecast = Object.values(dailyForecasts).slice(0, 7);
+                
+                return {
                     weather: {temperature, description, windSpeed, humidity, cityName},
                     latitude: latitude,
                     longitude: longitude,
-                    alerts: alertData.alerts || []
-                }));
+                    alerts: alertData.alerts || [],
+                    forecast: forecast
+                };
+            });
         })
         .then(result => {
-            const {weather, latitude, longitude, alerts} = result;
+            const {weather, latitude, longitude, alerts, forecast} = result;
             
             // <<-- Get weather image -->>
             const weatherImage = getWeatherImage(weather.description);
@@ -144,55 +173,14 @@ function getWeather() {
                     longitude: longitude
                 },
                 alerts: alerts,
-                forecast: []
+                forecast: forecast
             };
-            dataSource = 'api';
+            forecastEnabled = false;
+            document.getElementById('forecastToggleBtn').textContent = '7-Day Forecast: OFF';
+            document.getElementById('forecastToggleBtn').classList.remove('btn-danger');
+            document.getElementById('forecastToggleBtn').classList.add('btn-warning');
             
-            output.innerHTML = `
-                <h3 class="mb-3">${weather.cityName}</h3>
-                
-                <div class="weather-image-container mb-4">
-                    <img src="../Assets/${weatherImage}" alt="${weather.description}" class="weather-icon">
-                </div>
-
-                <div class="row">
-
-                    <div class="col-6 mb-3">
-                        <div class="card weather-box p-3 shadow-sm">
-                            <h6>🌡 Temperature</h6>
-                            <p>${weather.temperature} °C</p>
-                        </div>
-                    </div>
-
-                    <div class="col-6 mb-3">
-                        <div class="card weather-box p-3 shadow-sm">
-                            <h6>🌤 Weather</h6>
-                            <p>${weather.description}</p>
-                        </div>
-                    </div>
-
-                    <div class="col-6 mb-3">
-                        <div class="card weather-box p-3 shadow-sm">
-                            <h6>💨 Wind Speed</h6>
-                            <p>${weather.windSpeed} m/s</p>
-                        </div>
-                    </div>
-
-                    <div class="col-6 mb-3">
-                        <div class="card weather-box p-3 shadow-sm">
-                            <h6>💧 Humidity</h6>
-                            <p>${weather.humidity}%</p>
-                        </div>
-                    </div>
-
-                </div>
-                
-                ${alertsHTML}
-                
-                <div class="api-note">
-                    <small class="text-muted">Last updated by API: ${lastUpdated}</small>
-                </div>
-            `;
+            displayWeatherView(weather, weatherImage, alertsHTML, lastUpdated);
         })
         .catch(error => {
             output.innerHTML = `
@@ -334,6 +322,180 @@ window.onload = function() {
         document.getElementById('appView').classList.remove('d-none');
     }
 };
+
+// Display current weather view
+function displayWeatherView(weather, weatherImage, alertsHTML, lastUpdated) {
+    const output = document.getElementById('output');
+    output.innerHTML = `
+        <h3 class="mb-3">${weather.cityName}</h3>
+        
+        <div class="weather-image-container mb-4">
+            <img src="../Assets/${weatherImage}" alt="${weather.description}" class="weather-icon">
+        </div>
+
+        <div class="row">
+
+            <div class="col-6 mb-3">
+                <div class="card weather-box p-3 shadow-sm">
+                    <h6>🌡 Temperature</h6>
+                    <p>${weather.temperature} °C</p>
+                </div>
+            </div>
+
+            <div class="col-6 mb-3">
+                <div class="card weather-box p-3 shadow-sm">
+                    <h6>🌤 Weather</h6>
+                    <p>${weather.description}</p>
+                </div>
+            </div>
+
+            <div class="col-6 mb-3">
+                <div class="card weather-box p-3 shadow-sm">
+                    <h6>💨 Wind Speed</h6>
+                    <p>${weather.windSpeed} m/s</p>
+                </div>
+            </div>
+
+            <div class="col-6 mb-3">
+                <div class="card weather-box p-3 shadow-sm">
+                    <h6>💧 Humidity</h6>
+                    <p>${weather.humidity}%</p>
+                </div>
+            </div>
+
+        </div>
+        
+        ${alertsHTML}
+        
+        <div class="api-note">
+            <small class="text-muted">Last updated by API: ${lastUpdated}</small>
+        </div>
+    `;
+}
+
+// Toggle forecast view
+function toggleForecastView() {
+    if (!currentWeatherData) {
+        alert('No weather data available. Please search for a city first.');
+        return;
+    }
+    
+    forecastEnabled = !forecastEnabled;
+    const btn = document.getElementById('forecastToggleBtn');
+    
+    if (forecastEnabled) {
+        btn.textContent = '7-Day Forecast: ON';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-danger');
+        displayForecastView(currentWeatherData);
+    } else {
+        btn.textContent = '7-Day Forecast: OFF';
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-warning');
+        displayCurrentView();
+    }
+}
+
+// Display current weather view from saved data
+function displayCurrentView() {
+    if (!currentWeatherData) return;
+    
+    const current = currentWeatherData.current;
+    const alerts = currentWeatherData.alerts || [];
+    const lastUpdated = currentWeatherData.lastUpdated;
+    const weatherImage = getWeatherImage(current.description);
+    
+    let alertsHTML = '';
+    if (alerts.length > 0) {
+        alertsHTML = `
+            <div class="alerts-section alerts-section-danger mt-4">
+                <h4 class="alert-title mb-3">⚠️ Weather Alerts</h4>
+        `;
+        
+        alerts.forEach(alert => {
+            const startDate = new Date(alert.start * 1000).toLocaleString();
+            const endDate = new Date(alert.end * 1000).toLocaleString();
+            
+            alertsHTML += `
+                <div class="card alert-card p-3 mb-3 border-danger">
+                    <h5 class="card-title text-danger">${alert.event}</h5>
+                    <p class="card-text"><small class="text-muted"><strong>Source:</strong> ${alert.sender_name}</small></p>
+                    <p class="card-text">${alert.description}</p>
+                    <p class="card-text"><small class="text-muted">
+                        <strong>Starts:</strong> ${startDate}<br>
+                        <strong>Ends:</strong> ${endDate}
+                    </small></p>
+                </div>
+            `;
+        });
+        
+        alertsHTML += `</div>`;
+    } else {
+        alertsHTML = `
+            <div class="alerts-section alerts-section-safe mt-4">
+                <h4 class="alert-title-safe mb-3">✓ No Weather Alerts</h4>
+                <p class="text-success">No active weather alerts detected for this location.</p>
+            </div>
+        `;
+    }
+    
+    displayWeatherView(current, weatherImage, alertsHTML, lastUpdated);
+}
+
+// Display 7-day forecast view
+function displayForecastView(data) {
+    const output = document.getElementById('output');
+    const forecast = data.forecast || [];
+    const cityName = data.current.cityName;
+    
+    if (!forecast || forecast.length === 0) {
+        output.innerHTML = `
+            <div class="alert alert-info">
+                No forecast data available.
+            </div>
+        `;
+        return;
+    }
+    
+    let forecastHTML = `
+        <h3 class="mb-4">7-Day Forecast - ${cityName}</h3>
+        <div class="forecast-container">
+    `;
+    
+    forecast.forEach(day => {
+        const weatherImage = getWeatherImage(day.description);
+        forecastHTML += `
+            <div class="forecast-card">
+                <h6 class="forecast-date">${day.date}</h6>
+                <img src="../Assets/${weatherImage}" alt="${day.description}" class="forecast-icon">
+                <div class="forecast-temp">
+                    <div class="temp-box">
+                        <small class="temp-label">H</small>
+                        <span class="temp-high">${day.tempMax}°</span>
+                    </div>
+                    <div class="temp-box">
+                        <small class="temp-label">L</small>
+                        <span class="temp-low">${day.tempMin}°</span>
+                    </div>
+                </div>
+                <p class="forecast-desc">${day.description}</p>
+                <div class="forecast-details">
+                    <small>Humidity: ${day.humidity}%</small><br>
+                    <small>Wind: ${day.windSpeed} m/s</small>
+                </div>
+            </div>
+        `;
+    });
+    
+    forecastHTML += `
+        </div>
+        <div class="api-note">
+            <small class="text-muted">Last updated: ${data.lastUpdated}</small>
+        </div>
+    `;
+    
+    output.innerHTML = forecastHTML;
+}
 
 // Export weather data to JSON file
 function exportWeatherJSON() {
