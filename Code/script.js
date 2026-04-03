@@ -124,6 +124,8 @@ function getWeather() {
                 `;
             }
             
+            const lastUpdated = new Date().toLocaleString();
+            
             output.innerHTML = `
                 <h3 class="mb-3">${weather.cityName}</h3>
                 
@@ -164,6 +166,10 @@ function getWeather() {
                 </div>
                 
                 ${alertsHTML}
+                
+                <div class="api-note">
+                    <small class="text-muted">Last updated by API: ${lastUpdated}</small>
+                </div>
             `;
         })
         .catch(error => {

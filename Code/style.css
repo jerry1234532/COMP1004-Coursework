@@ -94,3 +94,55 @@ input, textarea {
     background-color: #ffebee;
     border-left: 4px solid #d32f2f;
 }
+
+/* API note styling */
+.api-note {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+/* App view container scrolling fix */
+.app-view-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.sticky-search {
+    flex-shrink: 0;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 10;
+}
+
+.scrollable-output {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 5px;
+}
+
+.scrollable-output::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable-output::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.scrollable-output::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.scrollable-output::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.sticky-logout {
+    flex-shrink: 0;
+    margin-top: 15px;
+}

@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<div class="container d-flex justify-content-center align-items-center vh-100">
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
 
     <!-- LOGIN VIEW -->
     <div id="loginView" class="card weather-card shadow p-4 w-100" style="max-width: 400px;">
@@ -46,18 +46,18 @@
     </div>
 
     <!-- WEATHER APP VIEW -->
-    <div id="appView" class="card weather-card shadow p-4 w-100 d-none" style="max-width: 600px;">
+    <div id="appView" class="card weather-card shadow p-4 w-100 d-none app-view-container" style="max-width: 600px;">
 
         <h1 class="text-center app-title mb-4">Weather App</h1>
 
-        <div class="input-group mb-3">
+        <div class="input-group mb-3 sticky-search">
             <input type="text" id="cityInput" class="form-control" placeholder="Enter city">
             <button class="btn btn-primary" onclick="getWeather()">Search</button>
         </div>
 
-        <div id="output"></div>
+        <div id="output" class="scrollable-output"></div>
 
-        <button class="btn btn-danger mt-3" onclick="logout()">Logout</button>
+        <button class="btn btn-danger mt-3 sticky-logout" onclick="logout()">Logout</button>
     </div>
 
 </div>
