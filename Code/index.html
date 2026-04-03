@@ -55,6 +55,12 @@
             <button class="btn btn-primary" onclick="getWeather()">Search</button>
         </div>
 
+        <div class="button-group mb-3">
+            <button class="btn btn-success btn-sm me-2" onclick="exportWeatherJSON()">Export JSON</button>
+            <button class="btn btn-info btn-sm" onclick="document.getElementById('jsonFileInput').click()">Import JSON</button>
+            <input type="file" id="jsonFileInput" accept=".json" style="display: none;" onchange="importWeatherJSON(event)">
+        </div>
+
         <div id="output" class="scrollable-output"></div>
 
         <button class="btn btn-danger mt-3 sticky-logout" onclick="logout()">Logout</button>

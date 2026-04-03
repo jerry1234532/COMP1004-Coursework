@@ -146,3 +146,10 @@ input, textarea {
     flex-shrink: 0;
     margin-top: 15px;
 }
+
+/* JSON import/export buttons */
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
