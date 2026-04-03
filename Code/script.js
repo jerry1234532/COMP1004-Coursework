@@ -1,5 +1,41 @@
 const apiKey = 'd33240b0e6f1240bb1be4def48a3a041';
 
+// Map weather conditions to SVG images
+function getWeatherImage(description) {
+    const desc = description.toLowerCase();
+    
+    // Map various weather descriptions to image files
+    const weatherMap = {
+        'clear sky': 'day_clear.svg',
+        'sunny': 'day_clear.svg',
+        'few clouds': 'day_partial_cloud.svg',
+        'partly cloudy': 'day_partial_cloud.svg',
+        'scattered clouds': 'cloudy.svg',
+        'overcast clouds': 'overcast.svg',
+        'broken clouds': 'overcast.svg',
+        'shower rain': 'day_rain.svg',
+        'rain': 'rain.svg',
+        'thunderstorm': 'rain_thunder.svg',
+        'snow': 'snow.svg',
+        'mist': 'mist.svg',
+        'fog': 'fog.svg',
+        'sleet': 'sleet.svg',
+        'drizzle': 'day_rain.svg',
+        'light rain': 'day_rain.svg',
+        'heavy rain': 'rain.svg'
+    };
+    
+    // Find matching weather condition
+    for (let [key, value] of Object.entries(weatherMap)) {
+        if (desc.includes(key)) {
+            return value;
+        }
+    }
+    
+    // Default to cloudy if no match found
+    return 'cloudy.svg';
+}
+
 function getWeather() {
     const city = document.getElementById('cityInput').value.trim();
     const output = document.getElementById('output');
@@ -49,6 +85,9 @@ function getWeather() {
         .then(result => {
             const {weather, alerts} = result;
             
+            // <<-- Get weather image -->>
+            const weatherImage = getWeatherImage(weather.description);
+            
             // <<-- Display UI (Bootstrap + custom CSS) -->>
             let alertsHTML = '';
             
@@ -87,6 +126,10 @@ function getWeather() {
             
             output.innerHTML = `
                 <h3 class="mb-3">${weather.cityName}</h3>
+                
+                <div class="weather-image-container mb-4">
+                    <img src="../Assets/${weatherImage}" alt="${weather.description}" class="weather-icon">
+                </div>
 
                 <div class="row">
 
@@ -236,7 +279,7 @@ function switchToRegister() {
     document.getElementById('loginView').classList.add('d-none');
     document.getElementById('registerView').classList.remove('d-none');
     document.getElementById('registerOutput').innerHTML = '';
-    // Clear register form
+    // <-- Clear register form -->>
     document.getElementById('regName').value = '';
     document.getElementById('regEmail').value = '';
     document.getElementById('regPassword').value = '';

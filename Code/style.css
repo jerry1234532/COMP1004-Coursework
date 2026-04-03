@@ -28,6 +28,20 @@ input, textarea {
     color: #333;
 }
 
+/* Weather image styling */
+.weather-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.weather-icon {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
 /* Weather data cards */
 .weather-box {
     border-radius: 10px;
