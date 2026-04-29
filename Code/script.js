@@ -123,7 +123,7 @@ function getWeather() {
             
             // <<-- Display UI (Bootstrap + custom CSS) -->>
             let alertsHTML = '';
-            
+            // <<-- Process alerts -->>
             if (alerts.length > 0) {
                 alertsHTML = `
                     <div class="alerts-section alerts-section-danger mt-4">
@@ -190,6 +190,7 @@ function getWeather() {
             `;
         });
 }
+// <<-- User registration and login system using localStorage -->>
 function register() {
     const name = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim();
@@ -279,7 +280,7 @@ function login() {
         localStorage.setItem('currentUser', username);
         document.getElementById('loginView').classList.add('d-none');
         document.getElementById('appView').classList.remove('d-none');
-        // Clear login form
+        // <<-- Clear login form -->>
         document.getElementById('username').value = '';
         document.getElementById('password').value = '';
     } else {
@@ -306,7 +307,7 @@ function switchToLogin() {
     document.getElementById('registerView').classList.add('d-none');
     document.getElementById('loginView').classList.remove('d-none');
     document.getElementById('loginOutput').innerHTML = '';
-    // Clear login form
+    // <<-- Clear login form -->>
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
 }
@@ -323,7 +324,7 @@ window.onload = function() {
     }
 };
 
-// Display current weather view
+// <<-- Display current weather view -->>
 function displayWeatherView(weather, weatherImage, alertsHTML, lastUpdated) {
     const output = document.getElementById('output');
     output.innerHTML = `
@@ -373,7 +374,7 @@ function displayWeatherView(weather, weatherImage, alertsHTML, lastUpdated) {
     `;
 }
 
-// Toggle forecast view
+// <<-- Toggle forecast view -->>
 function toggleForecastView() {
     if (!currentWeatherData) {
         alert('No weather data available. Please search for a city first.');
@@ -396,7 +397,7 @@ function toggleForecastView() {
     }
 }
 
-// Display current weather view from saved data
+// <<-- Display current weather view from saved data -->>
 function displayCurrentView() {
     if (!currentWeatherData) return;
     
@@ -442,7 +443,7 @@ function displayCurrentView() {
     displayWeatherView(current, weatherImage, alertsHTML, lastUpdated);
 }
 
-// Display 7-day forecast view
+// <<-- Display 7-day forecast view -->>
 function displayForecastView(data) {
     const output = document.getElementById('output');
     const forecast = data.forecast || [];
@@ -497,7 +498,7 @@ function displayForecastView(data) {
     output.innerHTML = forecastHTML;
 }
 
-// Export weather data to JSON file
+// <<-- Export weather data to JSON file -->>
 function exportWeatherJSON() {
     if (!currentWeatherData) {
         alert('No weather data to export. Please search for a city first.');
@@ -516,7 +517,7 @@ function exportWeatherJSON() {
     URL.revokeObjectURL(url);
 }
 
-// Import weather data from JSON file
+// <<-- Import weather data from JSON file -->>
 function importWeatherJSON(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -545,13 +546,13 @@ function importWeatherJSON(event) {
     reader.readAsText(file);
 }
 
-// Display imported weather data
+// <<-- Display imported weather data -->>
 function displayImportedWeather(data) {
     const output = document.getElementById('output');
     const current = data.current;
     const alerts = data.alerts || [];
     
-    // Get weather image for the condition
+    // <<-- Get weather image for the condition -->>
     const weatherImage = getWeatherImage(current.description);
     
     let alertsHTML = '';
