@@ -1,13 +1,16 @@
+// >> API Configuration & Global State Variables
 const apiKey = 'd33240b0e6f1240bb1be4def48a3a041';
 let currentWeatherData = null;
-let dataSource = 'api'; // 'api' or 'import'
-let forecastEnabled = false; // Toggle for 7-day forecast
+let dataSource = 'api'; // --> 'api' or 'import' - tracks data origin
+let forecastEnabled = false; // --> Toggle for 7-day forecast display
 
-// Map weather conditions to SVG images
+// >> Weather Image Mapping - Converts weather descriptions to SVG files
+// Purpose: Provides consistent visual representation of weather conditions
 function getWeatherImage(description) {
     const desc = description.toLowerCase();
     
-    // Map various weather descriptions to image files
+    // >> Weather condition to image file mapping
+    // --> Handles multiple descriptions for same condition (e.g., 'sunny' and 'clear sky')
     const weatherMap = {
         'clear sky': 'day_clear.svg',
         'sunny': 'day_clear.svg',
@@ -28,22 +31,25 @@ function getWeatherImage(description) {
         'heavy rain': 'rain.svg'
     };
     
-    // Find matching weather condition
+    // >> Search for matching weather condition - First match wins
     for (let [key, value] of Object.entries(weatherMap)) {
         if (desc.includes(key)) {
             return value;
         }
     }
     
-    // Default to cloudy if no match found
+    // >> Fallback to cloudy if no weather match found
     return 'cloudy.svg';
 }
 
+// >> Main Weather Search Function
+// Purpose: Fetches weather data from OpenWeatherMap API and displays it
+// Presentation Point: Demonstrates API integration and async data handling
 function getWeather() {
     const city = document.getElementById('cityInput').value.trim();
     const output = document.getElementById('output');
 
-    // <<-- Empty input check -->>
+    // >> Validate user input - check if city field is empty
     if (city === "") {
         output.innerHTML = `
             <div class="alert alert-warning">
@@ -53,7 +59,7 @@ function getWeather() {
         return;
     }
 
-    // <<-- Loading message -->>
+    // >> Display loading state while fetching data
     output.innerHTML = `<p class="loading">Loading...</p>`;
 
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
@@ -66,7 +72,7 @@ function getWeather() {
             return response.json();
         })
         .then(data => {
-            // <<-- Extract data -->>
+            // >> Extract relevant weather data from API response
             const temperature = data.main.temp;
             const description = data.weather[0].description;
             const windSpeed = data.wind.speed;
@@ -75,21 +81,23 @@ function getWeather() {
             const latitude = data.coord.lat;
             const longitude = data.coord.lon;
 
-            // <<-- Fetch alerts data -->>
+            // >> Fetch alerts and forecast data using latitude/longitude
             const alertsUrl = `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&exclude=current,minutely,hourly,daily&appid=${apiKey}`;
             
-            // <<-- Fetch 7-day forecast data -->>
+            // --> Get 7-day forecast from weather API
             const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
             
+            // >> Fetch both alerts and forecast concurrently using Promise.all()
             return Promise.all([
                 fetch(alertsUrl).then(r => r.json()),
                 fetch(forecastUrl).then(r => r.json())
             ]).then(([alertData, forecastData]) => {
-                // Process forecast data - take one forecast per day (at noon)
+                // >> Process 7-day forecast data - consolidate to one entry per day (noon preferred)
+                // Presentation Point: Demonstrates data transformation and filtering
                 const dailyForecasts = {};
                 forecastData.list.forEach(item => {
                     const date = new Date(item.dt * 1000).toLocaleDateString();
-                    // Take the first forecast of each day or noon if available
+                    // --> Prioritize noon forecasts, fallback to first forecast of day
                     if (!dailyForecasts[date] || item.dt_txt.includes('12:00')) {
                         dailyForecasts[date] = {
                             date: date,
@@ -104,8 +112,10 @@ function getWeather() {
                     }
                 });
                 
+                // >> Extract first 7 days of consolidated forecast data
                 const forecast = Object.values(dailyForecasts).slice(0, 7);
                 
+                // >> Return organized data structure for display
                 return {
                     weather: {temperature, description, windSpeed, humidity, cityName},
                     latitude: latitude,
@@ -118,12 +128,12 @@ function getWeather() {
         .then(result => {
             const {weather, latitude, longitude, alerts, forecast} = result;
             
-            // <<-- Get weather image -->>
+            // >> Select appropriate weather icon based on conditions
             const weatherImage = getWeatherImage(weather.description);
             
-            // <<-- Display UI (Bootstrap + custom CSS) -->>
+            // >> Build weather alerts section - shows active weather warnings
             let alertsHTML = '';
-            // <<-- Process alerts -->>
+            // --> Process and display weather alerts if available
             if (alerts.length > 0) {
                 alertsHTML = `
                     <div class="alerts-section alerts-section-danger mt-4">
@@ -157,9 +167,10 @@ function getWeather() {
                 `;
             }
             
+            // >> Record current timestamp for data tracking
             const lastUpdated = new Date().toLocaleString();
             
-            // Store weather data for export
+            // >> Store weather data globally for export and forecast toggle functionality
             currentWeatherData = {
                 source: 'json',
                 lastUpdated: lastUpdated,
@@ -190,7 +201,10 @@ function getWeather() {
             `;
         });
 }
-// <<-- User registration and login system using localStorage -->>
+
+// >> User Authentication System - Registration Function
+// Purpose: Validates and stores new user accounts in browser localStorage
+// Presentation Point: Demonstrates form validation and local data persistence
 function register() {
     const name = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim();
@@ -198,7 +212,7 @@ function register() {
     const verifyPassword = document.getElementById('regVerifyPassword').value.trim();
     const registerOutput = document.getElementById('registerOutput');
 
-    // <<-- Validation -->> 
+    // >> Step 1: Validate all required fields are filled 
     if (name === "" || email === "" || password === "" || verifyPassword === "") {
         registerOutput.innerHTML = `
             <div class="alert alert-warning">
@@ -208,6 +222,7 @@ function register() {
         return;
     }
 
+    // >> Step 2: Verify passwords match
     if (password !== verifyPassword) {
         registerOutput.innerHTML = `
             <div class="alert alert-warning">
@@ -217,6 +232,7 @@ function register() {
         return;
     }
 
+    // >> Step 3: Enforce minimum password length for security
     if (password.length < 6) {
         registerOutput.innerHTML = `
             <div class="alert alert-warning">
@@ -226,7 +242,7 @@ function register() {
         return;
     }
 
-    // <<-- Check if user already exists -->> 
+    // >> Step 4: Check if email already registered - prevent duplicates 
     let users = JSON.parse(localStorage.getItem('users') || '[]');
     if (users.some(user => user.email === email)) {
         registerOutput.innerHTML = `
@@ -237,7 +253,7 @@ function register() {
         return;
     }
 
-    // <<-- Register user -->> 
+    // >> Step 5: Add new user to localStorage and save 
     users.push({
         name: name,
         email: email,
@@ -256,12 +272,15 @@ function register() {
     }, 1500);
 }
 
+// >> User Authentication System - Login Function
+// Purpose: Authenticates user against stored credentials or admin account
+// Presentation Point: Demonstrates credential verification and session management
 function login() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
     const loginOutput = document.getElementById('loginOutput');
 
-    // <<-- Simple validation -->> 
+    // >> Validate credentials provided 
     if (username === "" || password === "") {
         loginOutput.innerHTML = `
             <div class="alert alert-warning">
@@ -271,16 +290,18 @@ function login() {
         return;
     }
 
-    // <<-- Check registered users or default admin -->> 
+    // >> Retrieve stored users and verify credentials
+    // --> Supports both registered users and default admin account 
     let users = JSON.parse(localStorage.getItem('users') || '[]');
     let user = users.find(u => u.email === username || u.name === username);
     
     if ((user && user.password === password) || (username === "admin" && password === "1234")) {
+        // >> Valid credentials - set session and show app
         localStorage.setItem('loggedIn', 'true');
         localStorage.setItem('currentUser', username);
         document.getElementById('loginView').classList.add('d-none');
         document.getElementById('appView').classList.remove('d-none');
-        // <<-- Clear login form -->>
+        // --> Clear form fields for security
         document.getElementById('username').value = '';
         document.getElementById('password').value = '';
     } else {
@@ -292,31 +313,38 @@ function login() {
     }
 }
 
+// >> UI Navigation - Switch to Registration Form
 function switchToRegister() {
     document.getElementById('loginView').classList.add('d-none');
     document.getElementById('registerView').classList.remove('d-none');
     document.getElementById('registerOutput').innerHTML = '';
-    // <-- Clear register form -->>
+    // >> Clear previous form data
     document.getElementById('regName').value = '';
     document.getElementById('regEmail').value = '';
     document.getElementById('regPassword').value = '';
     document.getElementById('regVerifyPassword').value = '';
 }
 
+// >> UI Navigation - Switch to Login Form
 function switchToLogin() {
     document.getElementById('registerView').classList.add('d-none');
     document.getElementById('loginView').classList.remove('d-none');
     document.getElementById('loginOutput').innerHTML = '';
-    // <<-- Clear login form -->>
+    // >> Clear form fields
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
 }
+
+// >> User Session - Logout Function
 function logout() {
+    // >> Clear session and return to login screen
     localStorage.removeItem('loggedIn');
     document.getElementById('appView').classList.add('d-none');
     document.getElementById('loginView').classList.remove('d-none');
 }
 
+// >> Application Initialization - Runs when page loads
+// Purpose: Restores user session if previously logged in
 window.onload = function() {
     if (localStorage.getItem('loggedIn') === 'true') {
         document.getElementById('loginView').classList.add('d-none');
@@ -324,7 +352,9 @@ window.onload = function() {
     }
 };
 
-// <<-- Display current weather view -->>
+// >> Display Current Weather View
+// Purpose: Renders weather information in card layout with icons
+// Presentation Point: Shows data organization and Bootstrap UI framework usage
 function displayWeatherView(weather, weatherImage, alertsHTML, lastUpdated) {
     const output = document.getElementById('output');
     output.innerHTML = `
@@ -374,7 +404,9 @@ function displayWeatherView(weather, weatherImage, alertsHTML, lastUpdated) {
     `;
 }
 
-// <<-- Toggle forecast view -->>
+// >> Toggle Forecast Display
+// Purpose: Switches between current weather and 7-day forecast views
+// Presentation Point: Demonstrates state management and dynamic UI updates
 function toggleForecastView() {
     if (!currentWeatherData) {
         alert('No weather data available. Please search for a city first.');
@@ -397,7 +429,9 @@ function toggleForecastView() {
     }
 }
 
-// <<-- Display current weather view from saved data -->>
+// >> Display Current Weather from Cache
+// Purpose: Redisplays current weather data without API call
+// Presentation Point: Shows data reuse and efficient resource management
 function displayCurrentView() {
     if (!currentWeatherData) return;
     
@@ -443,7 +477,9 @@ function displayCurrentView() {
     displayWeatherView(current, weatherImage, alertsHTML, lastUpdated);
 }
 
-// <<-- Display 7-day forecast view -->>
+// >> Display 7-Day Forecast
+// Purpose: Renders multi-day weather forecast in card grid layout
+// Presentation Point: Demonstrates iteration and conditional rendering of data
 function displayForecastView(data) {
     const output = document.getElementById('output');
     const forecast = data.forecast || [];
@@ -498,7 +534,9 @@ function displayForecastView(data) {
     output.innerHTML = forecastHTML;
 }
 
-// <<-- Export weather data to JSON file -->>
+// >> Export Weather Data Function
+// Purpose: Downloads current weather data as JSON file
+// Presentation Point: Demonstrates file generation and download handling
 function exportWeatherJSON() {
     if (!currentWeatherData) {
         alert('No weather data to export. Please search for a city first.');
@@ -517,7 +555,9 @@ function exportWeatherJSON() {
     URL.revokeObjectURL(url);
 }
 
-// <<-- Import weather data from JSON file -->>
+// >> Import Weather Data Function
+// Purpose: Loads previously exported weather data from JSON file
+// Presentation Point: Demonstrates file parsing and data validation
 function importWeatherJSON(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -546,13 +586,15 @@ function importWeatherJSON(event) {
     reader.readAsText(file);
 }
 
-// <<-- Display imported weather data -->>
+// >> Display Imported Weather Data
+// Purpose: Renders imported weather data with same formatting as API data
+// Presentation Point: Shows data source flexibility and consistent UI rendering
 function displayImportedWeather(data) {
     const output = document.getElementById('output');
     const current = data.current;
     const alerts = data.alerts || [];
     
-    // <<-- Get weather image for the condition -->>
+    // >> Select weather icon matching imported data conditions
     const weatherImage = getWeatherImage(current.description);
     
     let alertsHTML = '';
